@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CAT Marks Tracker</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--tx:#1a1d29;--mu:#6b7080;--bd:#e3e6ef;--ac:#4f46e5;--V:#4f7cff;--D:#e8920f;--Q:#1fa971;--bad:#d64545;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12141c;--card:#1b1e29;--tx:#eceef5;--mu:#9498aa;--bd:#2b2f3f;--ac:#8b85ff}}
+:root[data-theme="dark"]{--bg:#12141c;--card:#1b1e29;--tx:#eceef5;--mu:#9498aa;--bd:#2b2f3f;--ac:#8b85ff}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:920px;margin:0 auto;padding:20px 14px 40px}
+h1{font-size:22px;margin:0 0 2px}h2{font-size:16px;margin:0 0 12px}
+.sub{color:var(--mu);margin:0 0 18px;font-size:13px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px}
+.stat b{display:block;font-size:22px}.stat span{color:var(--mu);font-size:12px}
+select{appearance:none;-webkit-appearance:none;-moz-appearance:none;padding-right:30px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%238a8fa3' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;background-size:12px 8px;cursor:pointer}
+.pt{cursor:pointer;transition:r .1s}.pt:hover{r:7}
+#tip{position:fixed;display:none;z-index:50;pointer-events:none;background:var(--tx);color:var(--bg);font-size:12px;line-height:1.4;padding:7px 10px;border-radius:8px;white-space:pre-line;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+label{font-size:12px;color:var(--mu);display:block;margin-bottom:3px}
+input,select{width:100%;padding:8px 9px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.sec{border-left:4px solid;padding:6px 0 6px 12px;margin-bottom:12px}
+.sec h3{margin:0 0 6px;font-size:14px}
+.g3{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}@media(max-width:480px){.g3{grid-template-columns:repeat(2,1fr)}}
+button{background:var(--ac);color:#fff;border:0;border-radius:8px;padding:9px 16px;font:inherit;font-weight:600;cursor:pointer}
+button.x{background:none;color:var(--bad);padding:2px 8px}
+button.alt{background:var(--card);color:var(--tx);border:1px solid var(--bd)}
+textarea{width:100%;margin:8px 0;padding:8px 9px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:12px/1.4 ui-monospace,Menlo,monospace}
+summary{cursor:pointer;color:var(--mu);font-size:13px}#bmsg{font-size:13px;margin-left:10px;color:var(--mu)}
+#msg{color:var(--bad);font-size:13px;margin-left:10px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+th,td{padding:8px 6px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}
+td{vertical-align:top}.sm{display:block;color:var(--mu);font-size:11px;font-weight:400;margin-top:1px}
+table.t{min-width:0;font-size:13px}.t th,.t td{padding:9px 5px;white-space:normal}.t th:first-child,.t td:first-child{padding-left:2px}.t tr:last-child td{border-bottom:0}.t tr.tot td{background:var(--bg)}
+th{color:var(--mu);font-weight:600;font-size:12px}
+.bar{height:8px;background:var(--bd);border-radius:6px;overflow:hidden;margin:4px 0 10px}
+.bar i{display:block;height:100%}
+.leg{display:flex;gap:14px;font-size:12px;color:var(--mu);margin-top:6px;flex-wrap:wrap}
+.leg s{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;text-decoration:none}
+.empty{color:var(--mu);text-align:center;padding:24px 0}
+</style></head><body><main>
+<h1>📈 CAT Marks Tracker</h1>
+<p class="sub">Log mocks and sectionals. +3 per correct, −1 per wrong MCQ (no negative on TITA, so you can edit the score). Max 198: VARC 72 · DILR 60 · QA 66.</p>
+
+<div class="stats" id="stats"></div>
+
+<div class="card" id="formCard"><h2 id="formTitle">Add a score</h2>
+<div class="row">
+<div><label>Type</label><select id="type"><option value="full">Full mock</option><option value="sec">Sectional</option></select></div>
+<div id="secWrap" style="display:none"><label>Section</label><select id="secSel"><option value="V">VARC</option><option value="D">DILR</option><option value="Q">QA</option></select></div>
+<div><label>Name</label><input id="name" placeholder="e.g. IMS Mock 5"></div>
+<div><label>Date</label><input id="date" type="date"></div><div id="pWrap"><label>Overall percentile</label><input id="pT" type="number" min="0" max="100" step="0.01" placeholder="optional"></div>
+</div>
+<div id="secs"></div>
+<button id="save">Save entry</button><button id="cancel" class="x" style="display:none;color:var(--mu);margin-left:6px">Cancel</button><span id="msg"></span>
+</div>
+
+<div class="card"><h2 style="display:flex;justify-content:space-between;align-items:center;gap:8px">Progress <select id="metric" style="width:auto"><option value="sec">Section scores (marks)</option><option value="tot">Total score (marks)</option><option value="acc">Accuracy %</option><option value="pct">Percentile</option></select></h2><div class="scroll"><svg id="chart" viewBox="0 0 640 230" style="width:100%;min-width:420px"></svg></div><div class="leg" id="leg"></div></div>
+
+<div class="card"><h2>Section averages</h2><div class="scroll" id="avg"></div></div>
+
+<div class="card"><h2 style="display:flex;justify-content:space-between;align-items:center;gap:8px">History <select id="ord" style="width:auto"><option value="d">Newest first</option><option value="a">Oldest first</option></select></h2><div class="scroll" id="hist"></div></div>
+<div class="card"><h2>Backup</h2>
+<p class="sub" style="margin-bottom:12px">Export your entries to a file and import them on any device or browser, or restore after clearing your data.</p>
+<div class="row"><div><label>Import mode</label><select id="impMode"><option value="merge">Merge with existing entries</option><option value="replace">Replace all entries</option></select></div></div>
+<button id="exp">Export data</button> <button id="imp" class="alt">Import file</button><input type="file" id="file" accept=".json,application/json" hidden><span id="bmsg"></span>
+<details style="margin-top:14px"><summary>Or paste backup text</summary><textarea id="paste" rows="4" placeholder="Paste exported JSON here"></textarea><button id="impPaste" class="alt">Import pasted text</button></details></div>
+</main>
+<script>
+const S={V:{n:'VARC',q:24,max:72,c:'var(--V)'},D:{n:'DILR',q:20,max:60,c:'var(--D)'},Q:{n:'QA',q:22,max:66,c:'var(--Q)'}};
+const K=Object.keys(S);let data=[];const $=id=>document.getElementById(id);
+try{data=JSON.parse(localStorage.getItem('cat-tracker')||'[]')}catch(e){data=[]}
+const persist=()=>{try{localStorage.setItem('cat-tracker',JSON.stringify(data))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+$('date').valueAsDate=new Date();
+const manual={};
+$('secs').innerHTML=K.map(k=>`<div class="sec" id="b${k}" style="border-color:${S[k].c}"><h3>${S[k].n} <span style="color:var(--mu);font-weight:400">(${S[k].q} Qs, max ${S[k].max})</span></h3><div class="g3"><div><label>Attempted</label><input type="number" min="0" max="${S[k].q}" id="a${k}"></div><div><label>Correct</label><input type="number" min="0" max="${S[k].q}" id="c${k}"></div><div><label>Score</label><input type="number" id="s${k}"></div><div><label>Percentile</label><input type="number" min="0" max="100" step="0.01" id="p${k}" placeholder="optional"></div></div></div>`).join('');
+K.forEach(k=>{
+ const calc=()=>{if(manual[k])return;const a=+$('a'+k).value,c=+$('c'+k).value;$('s'+k).value=($('a'+k).value===''&&$('c'+k).value==='')?'':c*3-(a-c)};
+ $('a'+k).oninput=calc;$('c'+k).oninput=calc;$('s'+k).oninput=()=>{manual[k]=true};
+});
+function layout(){const sec=$('type').value==='sec';$('secWrap').style.display=sec?'':'none';$('pWrap').style.display=sec?'none':'';K.forEach(k=>$('b'+k).style.display=(!sec||$('secSel').value===k)?'':'none')}
+$('type').onchange=layout;$('secSel').onchange=layout;layout();
+
+$('save').onclick=()=>{
+ const sec=$('type').value==='sec',secs={};$('msg').textContent='';
+ for(const k of K){
+  if(sec&&$('secSel').value!==k)continue;
+  const a=$('a'+k).value,c=$('c'+k).value,s=$('s'+k).value;
+  if(a===''&&c===''&&s==='')continue;
+  if(a===''||c===''||s===''||+c>+a||+a>S[k].q){$('msg').textContent=`Check ${S[k].n}: fill all fields; correct ≤ attempted ≤ ${S[k].q}.`;return}
+  const pv=$('p'+k).value;if(pv!==''&&(+pv<0||+pv>100)){$('msg').textContent='Percentile must be 0–100.';return}
+  secs[k]={a:+a,c:+c,s:+s,p:pv===''?null:+pv};
+ }
+ if(!Object.keys(secs).length){$('msg').textContent='Enter at least one section.';return}
+ const ent={id:editId||Date.now(),type:$('type').value,pt:(!sec&&$('pT').value!=='')?Math.min(100,Math.max(0,+$('pT').value)):null,name:$('name').value.trim()||(sec?'Sectional':'Mock'),date:$('date').value,secs};
+ if(editId)data=data.map(x=>x.id===editId?ent:x);else data.push(ent);
+ data.sort((x,y)=>x.date.localeCompare(y.date)||x.id-y.id);persist();
+ K.forEach(k=>{['a','c','s','p'].forEach(p=>$(p+k).value='');manual[k]=false});$('name').value='';$('pT').value='';endEdit();render();
+};
+const total=e=>K.reduce((t,k)=>t+(e.secs[k]?e.secs[k].s:0),0);
+const fulls=()=>data.filter(e=>e.type==='full'&&K.every(k=>e.secs[k]));
+
+const sortData=()=>data.sort((x,y)=>(x.date||'').localeCompare(y.date||'')||x.id-y.id);
+function render(){
+ sortData();const f=fulls(),tots=f.map(total);
+ const allA=data.reduce((t,e)=>t+K.reduce((u,k)=>u+(e.secs[k]?e.secs[k].a:0),0),0),allC=data.reduce((t,e)=>t+K.reduce((u,k)=>u+(e.secs[k]?e.secs[k].c:0),0),0);
+ const pts=f.filter(e=>e.pt!=null).map(e=>e.pt);
+ const st=[['Overall accuracy',allA?Math.round(allC/allA*100)+'%':'–'],['Latest %ile',pts.length?pts[pts.length-1]:'–'],['Best %ile',pts.length?Math.max(...pts):'–'],['Entries',data.length],['Full mocks',f.length],['Latest total',tots.length?tots[tots.length-1]+'/198':'–'],['Best total',tots.length?Math.max(...tots):'–'],['Avg total',tots.length?(tots.reduce((a,b)=>a+b,0)/tots.length).toFixed(1):'–']];
+ $('stats').innerHTML=st.map(x=>`<div class="stat"><b>${x[1]}</b><span>${x[0]}</span></div>`).join('');
+ // averages
+ const mk=(n,c,l,max,sub,cls)=>{
+  const nm=`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c};margin-right:6px"></span><b>${n}</b>`;
+  if(!l.length)return `<tr class="${cls||''}"><td>${nm}</td><td colspan="5" style="color:var(--mu)">No data yet</td></tr>`;
+  const avg=l.reduce((t,x)=>t+x.s,0)/l.length,A=l.reduce((t,x)=>t+x.a,0),C=l.reduce((t,x)=>t+x.c,0),pl=l.filter(x=>x.p!=null),pa=pl.length?(pl.reduce((t,x)=>t+x.p,0)/pl.length).toFixed(1):'–',pc=Math.round(Math.max(0,avg/max*100));
+  return `<tr class="${cls||''}"><td>${nm}<span class="sm">${l.length} ${sub}</span></td><td><b>${avg.toFixed(1)}</b><span class="sm">of ${max} · ${pc}%</span></td><td>${Math.max(...l.map(x=>x.s))}</td><td>${A?Math.round(C/A*100):0}%</td><td>${(A/l.length).toFixed(1)}</td><td>${pa}</td></tr>`};
+ const rows=K.map(k=>mk(S[k].n,S[k].c,data.filter(e=>e.secs[k]).map(e=>e.secs[k]),S[k].max,'entries')).join('')+mk('Total','var(--ac)',f.map(e=>({s:total(e),a:K.reduce((t,k)=>t+e.secs[k].a,0),c:K.reduce((t,k)=>t+e.secs[k].c,0),p:e.pt})),198,'full mocks','tot');
+ $('avg').innerHTML=`<table class="t"><tr><th>Section</th><th>Avg score</th><th>Best</th><th>Accuracy</th><th>Avg attempted</th><th>Avg %ile</th></tr>${rows}</table>`;
+ // history
+ $('hist').innerHTML=data.length?`<table><tr><th>Date</th><th>Name</th><th>Type</th>${K.map(k=>`<th>${S[k].n}</th>`).join('')}<th>Total</th><th></th></tr>${($('ord').value==='a'?[...data]:[...data].reverse()).map(e=>`<tr><td>${esc(e.date)}</td><td>${esc(e.name)}</td><td>${e.type==='full'?'Full':'Sectional'}</td>${K.map(k=>`<td>${e.secs[k]?'<b>'+e.secs[k].s+'</b><span class="sm">'+e.secs[k].c+'/'+e.secs[k].a+' · '+(e.secs[k].a?Math.round(e.secs[k].c/e.secs[k].a*100):0)+'%'+(e.secs[k].p!=null?' · '+e.secs[k].p+'%ile':'')+'</span>':'–'}</td>`).join('')}<td><b>${e.type==='full'?total(e):'–'}</b>${e.pt!=null?'<span class="sm">'+e.pt+'%ile</span>':''}</td><td style="white-space:nowrap"><button class="x" style="color:var(--ac)" onclick="edit(${e.id})">Edit</button><button class="x" onclick="del(${e.id})">✕</button></td></tr>`).join('')}</table>`:'<div class="empty">No entries yet. Add your first score above.</div>';
+ chart();
+}
+let editId=null;
+function edit(id){
+ const e=data.find(x=>x.id===id);if(!e)return;editId=id;
+ $('type').value=e.type;if(e.type==='sec')$('secSel').value=Object.keys(e.secs)[0];layout();
+ $('name').value=e.name;$('date').value=e.date;$('pT').value=e.pt==null?'':e.pt;
+ K.forEach(k=>{const x=e.secs[k];$('a'+k).value=x?x.a:'';$('c'+k).value=x?x.c:'';$('s'+k).value=x?x.s:'';$('p'+k).value=x&&x.p!=null?x.p:'';manual[k]=!!x&&x.s!==x.c*3-(x.a-x.c)});
+ $('save').textContent='Update entry';$('cancel').style.display='';$('formTitle').textContent='Editing: '+e.name;$('formCard').style.borderColor='var(--ac)';$('msg').textContent='';
+ $('formCard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function endEdit(){
+ editId=null;K.forEach(k=>{['a','c','s','p'].forEach(p=>$(p+k).value='');manual[k]=false});
+ $('name').value='';$('pT').value='';$('date').valueAsDate=new Date();$('msg').textContent='';
+ $('save').textContent='Save entry';$('cancel').style.display='none';$('formTitle').textContent='Add a score';$('formCard').style.borderColor='';
+}
+function del(id){if(id===editId)endEdit();data=data.filter(e=>e.id!==id);persist();render()}
+const secDet=(k,e)=>{const x=e.secs[k];return `${S[k].n} · ${e.name} (${e.date})\nScore ${x.s}/${S[k].max} · Accuracy ${x.a?Math.round(x.c/x.a*100):0}% · ${x.a} attempted`+(x.p!=null?` · ${x.p}%ile`:'')};
+const totDet=e=>`Total · ${e.name} (${e.date})\nScore ${total(e)}/198`+(e.pt!=null?` · ${e.pt}%ile`:'');
+const tip=document.createElement('div');tip.id='tip';document.body.appendChild(tip);
+function showTip(el){tip.textContent=el.getAttribute('data-t');tip.style.display='block';const r=el.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight;let x=Math.max(6,Math.min(innerWidth-w-6,r.left+r.width/2-w/2));tip.style.left=x+'px';tip.style.top=(r.top-h-8>6?r.top-h-8:r.bottom+8)+'px'}
+$('chart').addEventListener('pointerover',e=>{const t=e.target.closest('.pt');if(t)showTip(t)});
+$('chart').addEventListener('pointerout',e=>{if(e.target.closest('.pt'))tip.style.display='none'});
+$('chart').addEventListener('click',e=>{const t=e.target.closest('.pt');if(t)showTip(t);else tip.style.display='none'});
+document.addEventListener('scroll',()=>{tip.style.display='none'},true);
+function chart(){
+ const m=$('metric').value,W=640,H=230,L=40,R=12,T=12,B=26;
+ const ents=m==='tot'?fulls():data,n=ents.length;
+ const val=(k,e)=>{const x=e.secs[k];if(!x)return null;return m==='acc'?(x.a?x.c/x.a*100:null):m==='pct'?(x.p==null?null:x.p):x.s};
+ const tv=e=>{if(!(e.type==='full'&&K.every(k=>e.secs[k])))return null;if(m==='acc'){const A=K.reduce((t,k)=>t+e.secs[k].a,0);return A?K.reduce((t,k)=>t+e.secs[k].c,0)/A*100:null}return m==='pct'?(e.pt==null?null:e.pt):total(e)};
+ const series=[];
+ if(m!=='tot')K.forEach(k=>series.push({n:S[k].n,c:S[k].c,k,pts:ents.map((e,i)=>({i,e,v:val(k,e)})).filter(p=>p.v!=null)}));
+ if(m!=='sec')series.push({n:'Total',c:'var(--ac)',w:3.5,k:null,pts:ents.map((e,i)=>({i,e,v:tv(e)})).filter(p=>p.v!=null)});
+ const vals=series.flatMap(s=>s.pts.map(p=>p.v));
+ const ymax=m==='sec'?72:m==='tot'?198:100;let ymin=Math.min(0,...vals);if(ymin<0)ymin=Math.floor(ymin/10)*10;if(m==='pct')ymin=70;const st=m==='pct'?3:4;
+ const Y=v=>T+(H-T-B)*(1-(Math.min(ymax,Math.max(ymin,v))-ymin)/(ymax-ymin)),X=i=>n===1?(L+W-R)/2:L+(W-L-R)*i/(n-1);
+ let h='';
+ for(let j=0;j<=st;j++){const v=ymin+(ymax-ymin)*j/st,y=Y(v);h+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--bd)"/><text x="${L-6}" y="${y+4}" text-anchor="end" font-size="10" fill="var(--mu)">${Math.round(v)}${m==='acc'||m==='pct'?'%':''}</text>`}
+ if(!vals.length){h+=`<text x="${W/2}" y="${H/2}" text-anchor="middle" font-size="13" fill="var(--mu)">No data for this view yet</text>`;$('chart').innerHTML=h;$('leg').innerHTML='';return}
+ series.forEach(s=>{if(!s.pts.length)return;
+  h+=`<polyline fill="none" stroke="${s.c}" stroke-width="${s.w||2.5}" stroke-linejoin="round" stroke-linecap="round" points="${s.pts.map(p=>X(p.i)+','+Y(p.v)).join(' ')}"/>`;
+  h+=s.pts.map(p=>`<circle class="pt" data-t="${esc(s.k?secDet(s.k,p.e):totDet(p.e))}" cx="${X(p.i)}" cy="${Y(p.v)}" r="4.5" fill="${s.c}" stroke="transparent" stroke-width="18"/>`).join('')});
+ ents.forEach((e,i)=>{if(n<=12||i%Math.ceil(n/12)===0)h+=`<text x="${X(i)}" y="${H-8}" text-anchor="middle" font-size="9" fill="var(--mu)">${esc((e.date||'').slice(5))}</text>`});
+ $('chart').innerHTML=h;
+ $('leg').innerHTML=series.map(s=>`<span><s style="background:${s.c}"></s>${s.n}</span>`).join('');
+}
+const bmsg=(t,bad)=>{$('bmsg').textContent=t;$('bmsg').style.color=bad?'var(--bad)':'var(--mu)'};
+const payload=()=>JSON.stringify({app:'cat-tracker',version:1,exported:new Date().toISOString(),entries:data},null,2);
+function showText(){$('paste').value=payload();$('paste').closest('details').open=true}
+$('exp').onclick=async()=>{
+ if(!data.length){bmsg('Nothing to export yet.',1);return}
+ let dl=null;try{dl=window.claude?await window.claude.use('downloads'):null}catch(e){}
+ if(!dl){showText();bmsg('Downloads unavailable here. Copy the text below and keep it somewhere safe.');return}
+ try{await dl.save({filename:'cat-tracker-backup-'+new Date().toISOString().slice(0,10)+'.json',data:payload()});bmsg('Backup saved.')}
+ catch(e){if(e&&e.code==='declined')bmsg('Export cancelled.');else{showText();bmsg('Could not save a file. Copy the text below instead.',1)}}
+};
+function importText(txt){
+ let j;try{j=JSON.parse(txt)}catch(e){bmsg('That is not a valid backup.',1);return}
+ const arr=Array.isArray(j)?j:(j&&Array.isArray(j.entries)?j.entries:null);
+ if(!arr){bmsg('No entries found in that backup.',1);return}
+ const ok=v=>v!==null&&v!==''&&isFinite(Number(v)),today=new Date().toISOString().slice(0,10),clean=[];
+ arr.forEach((e,i)=>{
+  if(!e||typeof e!=='object'||!e.secs||typeof e.secs!=='object')return;
+  const secs={};K.forEach(k=>{const x=e.secs[k];if(x&&ok(x.a)&&ok(x.c)&&ok(x.s))secs[k]={a:+x.a,c:+x.c,s:+x.s,p:ok(x.p)?+x.p:null}});
+  if(!Object.keys(secs).length)return;
+  clean.push({id:ok(e.id)?+e.id:Date.now()+i,type:e.type==='sec'?'sec':'full',pt:ok(e.pt)?+e.pt:null,name:String(e.name||'Imported').slice(0,80),date:/^\d{4}-\d{2}-\d{2}$/.test(e.date)?e.date:today,secs});
+ });
+ if(!clean.length){bmsg('No valid entries found in that backup.',1);return}
+ let added=clean.length;
+ if($('impMode').value==='replace')data=clean;
+ else{const ids=new Set(data.map(x=>x.id));added=0;clean.forEach(e=>{if(!ids.has(e.id)){ids.add(e.id);data.push(e);added++}})}
+ persist();endEdit();render();
+ bmsg(added+' entr'+(added===1?'y':'ies')+' imported'+(clean.length>added?' ('+(clean.length-added)+' duplicates skipped)':'')+'.');
+}
+$('imp').onclick=()=>$('file').click();
+$('file').onchange=e=>{const f=e.target.files[0];if(!f)return;const fr=new FileReader();fr.onload=()=>importText(String(fr.result));fr.onerror=()=>bmsg('Could not read that file.',1);fr.readAsText(f);e.target.value=''};
+$('impPaste').onclick=()=>importText($('paste').value);
+$('metric').onchange=chart;$('ord').onchange=render;$('cancel').onclick=endEdit;render();
+</script></body></html>
